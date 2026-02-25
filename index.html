@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>GitHub Repo Crawler · CSV Export</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Inter font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"
+    rel="stylesheet"
+  >
+
+  <style>
+    :root {
+      --bg: #f5f5f7;
+      --card-bg: #ffffff;
+      --text: #111111;
+      --text-muted: #6e6e73;
+      --border-subtle: #e5e5ea;
+      --accent: #0071e3;
+      --accent-soft: rgba(0, 113, 227, 0.08);
+      --danger: #d70015;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+    }
+
+    body {
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #ffffff 0, #f5f5f7 45%, #ededf0 100%);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .shell {
+      width: 100%;
+      max-width: 720px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 24px;
+      box-shadow:
+        0 18px 45px rgba(0, 0, 0, 0.08),
+        0 1px 0 rgba(255, 255, 255, 0.6) inset;
+      padding: 32px 40px 28px;
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(22px);
+    }
+
+    .header {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .title {
+      font-size: 26px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      margin: 0 0 6px;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin: 0;
+    }
+
+    .form-row {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    label {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      border-radius: 999px;
+      border: 1px solid var(--border-subtle);
+      padding: 10px 14px;
+      font-size: 15px;
+      outline: none;
+      background: rgba(255, 255, 255, 0.9);
+      transition: border-color 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+    }
+
+    input::placeholder {
+      color: #b3b3b8;
+    }
+
+    input:focus {
+      border-color: rgba(0, 113, 227, 0.7);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+      background: #ffffff;
+    }
+
+    .hint {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .hint strong {
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .actions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    button {
+      border-radius: 999px;
+      border: none;
+      padding: 11px 18px;
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+      cursor: pointer;
+      background: var(--accent);
+      color: #ffffff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow:
+        0 8px 18px rgba(0, 113, 227, 0.32),
+        0 0 0 1px rgba(255, 255, 255, 0.6) inset;
+      transition:
+        transform 0.12s ease,
+        box-shadow 0.12s ease,
+        background 0.12s ease,
+        opacity 0.12s ease;
+    }
+
+    button span.spinner {
+      width: 14px;
+      height: 14px;
+      border-radius: 999px;
+      border: 2px solid rgba(255, 255, 255, 0.7);
+      border-top-color: #ffffff;
+      animation: spin 0.7s linear infinite;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: default;
+      box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.08),
+        0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+      transform: none;
+    }
+
+    button:not(:disabled):hover {
+      background: #0a84ff;
+      transform: translateY(-0.5px);
+      box-shadow:
+        0 10px 22px rgba(0, 113, 227, 0.38),
+        0 0 0 1px rgba(255, 255, 255, 0.7) inset;
+    }
+
+    button:not(:disabled):active {
+      transform: translateY(1px);
+      box-shadow:
+        0 5px 14px rgba(0, 113, 227, 0.4),
+        0 0 0 1px rgba(255, 255, 255, 0.7) inset;
+    }
+
+    .status {
+      font-size: 13px;
+      color: var(--text-muted);
+      min-height: 16px;
+    }
+
+    .status-strong {
+      color: var(--text);
+    }
+
+    .warning {
+      font-size: 12px;
+      color: var(--danger);
+      min-height: 14px;
+    }
+
+    .footer {
+      margin-top: 12px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 480px) {
+      .card {
+        padding: 22px 18px 18px;
+        border-radius: 20px;
+      }
+
+      .title {
+        font-size: 20px;
+      }
+    }
+
+    @media (min-width: 1200px) {
+      .shell {
+        max-width: 840px;
+      }
+
+      .card {
+        padding: 40px 56px 32px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="card">
+      <div class="header">
+        <h1 class="title">GitHub Repo Crawler</h1>
+        <p class="subtitle">Scan all public repositories and export to CSV - runs entirely in your browser.</p>
+      </div>
+
+      <div class="form-row">
+        <div class="field">
+          <label for="token">GitHub Personal Access Token (optional)</label>
+          <div class="input-wrapper">
+            <input
+              id="token"
+              type="password"
+              autocomplete="off"
+              placeholder="ghp_..."
+            />
+          </div>
+          <div class="hint">
+            <strong>Recommended:</strong> use a token to avoid the 60 requests/hour unauthenticated rate limit.
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="username">GitHub Username or Organization</label>
+          <div class="input-wrapper">
+            <input
+              id="username"
+              type="text"
+              autocomplete="off"
+              placeholder="e.g. vercel, microsoft, torvalds..."
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="fetchBtn">
+          <span id="btnText">Fetch &amp; Export CSV</span>
+          <span id="btnSpinner" class="spinner" style="display:none;"></span>
+        </button>
+        <div id="status" class="status"></div>
+        <div id="warning" class="warning"></div>
+      </div>
+
+      <div class="footer">
+        Uses GitHub REST API v3 · No data is sent to any server other than GitHub.
+      </div>
+    </div>
+  </div>
+
+  <script src="github-repo-crawler.js"></script>
+</body>
+</html>
